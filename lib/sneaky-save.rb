@@ -70,24 +70,12 @@ module SneakySave
 
     changed_attributes = sneaky_update_fields
 
-    # Serialize values for rails3 before updating
-    unless sneaky_new_rails?
-      serialized_fields = self.class.serialized_attributes.keys & changed_attributes.keys
-      serialized_fields.each do |field|
-        changed_attributes[field] = @attributes[field].serialized_value
-      end
-    end
-
     !self.class.unscoped.where(pk => original_id).
       update_all(changed_attributes).zero?
   end
 
   def sneaky_attributes_values
-    if sneaky_new_rails?
-      send :arel_attributes_with_values_for_create, attribute_names
-    else
-      send :arel_attributes_values
-    end
+    send :attributes_with_values_for_create, attribute_names
   end
 
   def sneaky_update_fields
@@ -97,15 +85,7 @@ module SneakySave
   end
 
   def sneaky_connection
-    if sneaky_new_rails?
-      self.class.connection
-    else
-      connection
-    end
-  end
-
-  def sneaky_new_rails?
-    ActiveRecord::VERSION::STRING.to_i > 3
+    self.class.connection
   end
 end
 

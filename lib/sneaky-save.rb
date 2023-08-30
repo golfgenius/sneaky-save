@@ -2,7 +2,7 @@
 # Copyright (c) 2011 {PartyEarth LLC}[http://partyearth.com]
 # mailto:kgoslar@partyearth.com
 #++
-class ActiveRecord::Base
+module SneakySave
 
   # Saves the record without running callbacks/validations.
   # Returns true if the record is changed.

@@ -2,7 +2,7 @@
 # Copyright (c) 2011 {PartyEarth LLC}[http://partyearth.com]
 # mailto:kgoslar@partyearth.com
 #++
-module SneakySave
+class ActiveRecord::Base
 
   # Saves the record without running callbacks/validations.
   # Returns true if the record is changed.
@@ -47,13 +47,13 @@ module SneakySave
     # Remove the id field for databases like Postgres
     # which fail with id passed as NULL
     if id.nil? && !prefetch_pk_allowed
-      attributes_values.reject! { |key, _| key.name == 'id' }
+      attributes_values.reject! { |key, _| key == 'id' || key == :id}
     end
 
     if attributes_values.empty?
-      new_id = self.class.unscoped.insert(sneaky_connection.empty_insert_statement_value)
+      new_id = self.class._insert_record(sneaky_connection.empty_insert_statement_value)
     else
-      new_id = self.class.unscoped.insert(attributes_values)
+      new_id = self.class._insert_record(attributes_values)
     end
 
     @new_record = false
@@ -76,9 +76,6 @@ module SneakySave
 
   def sneaky_attributes_values
     attributes_with_values = send :attributes_with_values_for_create, attribute_names
-    attributes_with_values.each_with_object({}) do |attribute_value, hash|
-      hash[self.class.send(:arel_attribute, attribute_value[0])] = attribute_value[1]
-    end
   end
 
   def sneaky_update_fields
